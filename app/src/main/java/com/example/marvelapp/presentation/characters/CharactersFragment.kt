@@ -56,29 +56,36 @@ class CharactersFragment : Fragment() {
     private fun initCharactersAdapter() {
         characterAdapter = CharacterAdapter()
         binding.recyclerCharacters.run {
+            scrollToPosition(0)
             setHasFixedSize(true)
-            adapter = characterAdapter
+            adapter = characterAdapter.withLoadStateFooter(
+                footer = CharactersLoadStateAdapter(
+                    characterAdapter::retry
+                )
+            )
         }
     }
 
     private fun observeInitialLoadState() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            characterAdapter.loadStateFlow.collectLatest { loadState ->
-                binding.flipperCharacters.displayedChild = when(loadState.refresh) {
-                    is LoadState.Loading -> {
-                        setShimmerVisibility(true)
-                        FLIPPER_CHILD_LOADING
-                    }
-                    is LoadState.NotLoading -> {
-                        setShimmerVisibility(false)
-                        FLIPPER_CHILD_SUCCESS
-                    }
-                    is LoadState.Error -> {
-                        setShimmerVisibility(false)
-                        binding.includeViewCharactersErrorState.buttonRetry.setOnClickListener {
-                            characterAdapter.refresh()
+        lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                characterAdapter.loadStateFlow.collectLatest { loadState ->
+                    binding.flipperCharacters.displayedChild = when (loadState.refresh) {
+                        is LoadState.Loading -> {
+                            setShimmerVisibility(true)
+                            FLIPPER_CHILD_LOADING
                         }
-                        FLIPPER_CHILD_ERROR
+                        is LoadState.NotLoading -> {
+                            setShimmerVisibility(false)
+                            FLIPPER_CHILD_SUCCESS
+                        }
+                        is LoadState.Error -> {
+                            setShimmerVisibility(false)
+                            binding.includeViewCharactersErrorState.buttonRetry.setOnClickListener {
+                                characterAdapter.refresh()
+                            }
+                            FLIPPER_CHILD_ERROR
+                        }
                     }
                 }
             }
@@ -89,7 +96,7 @@ class CharactersFragment : Fragment() {
     private fun setShimmerVisibility(visibility: Boolean) {
         binding.includeViewCharactersLoadingState.shimmerCharacters.run {
             isVisible = visibility
-            if(visibility) {
+            if (visibility) {
                 startShimmer()
             } else stopShimmer()
         }

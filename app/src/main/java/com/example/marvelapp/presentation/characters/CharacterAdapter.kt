@@ -13,7 +13,9 @@ class CharacterAdapter: PagingDataAdapter<Character, CharacterViewHolder>(diffCa
     }
 
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
-        getItem(position)?.let { holder.bind(it) }
+        getItem(position)?.let {
+            holder.bind(it)
+        }
     }
 
 

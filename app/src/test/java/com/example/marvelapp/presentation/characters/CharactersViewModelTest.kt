@@ -5,11 +5,15 @@ import com.example.core.usecase.GetCharactersUseCase
 import com.example.testing.MainCoroutineRule
 import com.example.testing.model.CharacterFactory
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -21,9 +25,9 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class CharactersViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @ExperimentalCoroutinesApi
     @get:Rule
-    private var mainCoroutineRule = MainCoroutineRule()
+    var mainCoroutineRule = MainCoroutineRule()
 
     @Mock
     lateinit var getCharactersUseCase: GetCharactersUseCase
@@ -45,6 +49,11 @@ class CharactersViewModelTest {
         charactersViewModel = CharactersViewModel(getCharactersUseCase)
     }
 
+    @After
+    fun doAfter() {
+        mainCoroutineRule.cancel()
+    }
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
@@ -58,9 +67,12 @@ class CharactersViewModelTest {
             )
         )
 
-        val result = charactersViewModel.charactersPagingData("")
+        mainCoroutineRule.launch {
+            val result = charactersViewModel.charactersPagingData("")
+            assertEquals(1, result.count())
+        }
 
-        assertEquals(1, result.count())
+        verify(getCharactersUseCase).invoke(any())
     }
 
 

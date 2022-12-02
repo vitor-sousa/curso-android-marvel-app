@@ -19,7 +19,7 @@ apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\vitor\\_PROJETOS_C\\Curso-Douglas-Motta\\keystore.jks')
+            storeFile file('$rootDir/store/keystore.jks')
             storePassword 'Marvel@123'
             keyAlias 'marvel-app'
             keyPassword 'Marvel@123'
@@ -42,9 +42,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            debuggable true
+        }
+        staging {
+            initWith debug
+            applicationIdSuffix '.staging'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'proguard-rules-staging.pro'
+        }
         release {
+            minifyEnabled true
+            shrinkResources true
             signingConfig signingConfigs.release
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

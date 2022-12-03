@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.gms.google-services'
 }
 
 apply plugin: 'kotlin-kapt'
@@ -20,6 +21,7 @@ android {
     signingConfigs {
         release {
             storeFile file('$rootDir/store/keystore.jks')
+//            storeFile file('C:\\Users\\vitor\\_PROJETOS_C\\Curso-Douglas-Motta\\store\\keystore.jks')
             storePassword 'Marvel@123'
             keyAlias 'marvel-app'
             keyPassword 'Marvel@123'
@@ -131,4 +133,9 @@ dependencies {
     // Instrumentation tests
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+
+
+    implementation platform('com.google.firebase:firebase-bom:31.1.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 }

@@ -1,10 +1,8 @@
 package com.example.marvelapp.framework.paging
 
-import android.accounts.NetworkErrorException
 import androidx.paging.PagingSource
 import com.example.core.data.repository.CharactersRemoteDataSource
 import com.example.marvelapp.factory.response.DataWrapperResponseFactory
-import com.example.marvelapp.framework.network.response.DataContainerResponse
 import com.example.marvelapp.framework.network.response.DataWrapperResponse
 import com.example.testing.MainCoroutineRule
 import com.example.testing.model.CharacterFactory
@@ -12,7 +10,6 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule

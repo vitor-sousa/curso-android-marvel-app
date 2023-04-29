@@ -9,6 +9,7 @@
               <option name="preferredColumnWidths">
                 <map>
                   <entry key="1_-_Pixel_5_API_33_Android_13" value="120" />
+                  <entry key="2_-_Galaxy_Nexus_API_30_Android_7.1.1" value="120" />
                   <entry key="Duration" value="90" />
                   <entry key="Tests" value="360" />
                 </map>

@@ -2,8 +2,7 @@ package com.example.marvelapp.framework.paging
 
 import androidx.paging.PagingSource
 import com.example.core.data.repository.CharactersRemoteDataSource
-import com.example.marvelapp.factory.response.DataWrapperResponseFactory
-import com.example.marvelapp.framework.network.response.DataWrapperResponse
+import com.example.marvelapp.factory.response.CharacterPagingFactory
 import com.example.testing.MainCoroutineRule
 import com.example.testing.model.CharacterFactory
 import com.nhaarman.mockitokotlin2.any
@@ -18,20 +17,20 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class CharactersPagingSourceTest {
 
-    @ExperimentalCoroutinesApi
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
 
     @Mock
-    lateinit var remoteDataSource: CharactersRemoteDataSource<DataWrapperResponse>
+    lateinit var remoteDataSource: CharactersRemoteDataSource
 
     private lateinit var charactersPagingSource: CharactersPagingSource
     private val characterFactory = CharacterFactory()
 
-    private val dataWrapperResponse = DataWrapperResponseFactory().create()
+    private val dataWrapperResponse = CharacterPagingFactory().create()
 
     @Before
     fun setUp() {
@@ -39,7 +38,6 @@ class CharactersPagingSourceTest {
     }
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `should return success load result when load is called `() = runBlockingTest {
 

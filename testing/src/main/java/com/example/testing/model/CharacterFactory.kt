@@ -6,12 +6,14 @@ class CharacterFactory {
 
     fun create(hero: Hero) = when(hero) {
         Hero.Spiderman -> Character(
-            "Spider-man",
-            "https://spider.man"
+            id = 1,
+            name = "Spider-man",
+            imageUrl = "https://i.annihil.us/u/prod/marvel/i/mg/b/80/4bc37bb4ae105/detail.jpg"
         )
         Hero.Wolverine -> Character(
-            "Wolverine",
-            "https://wolverine.com"
+            id = 2,
+            name = "Wolverine",
+            imageUrl = "https://marvelcdb.com/bundles/cards/32041.jpg"
         )
     }
 

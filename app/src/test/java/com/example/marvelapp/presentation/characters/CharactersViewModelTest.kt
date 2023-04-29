@@ -23,10 +23,10 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class CharactersViewModelTest {
 
-    @ExperimentalCoroutinesApi
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
 
@@ -56,7 +56,7 @@ class CharactersViewModelTest {
     }
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     @Test
     fun `should validate the paging data object values when calling charactersPagingData`() = runBlockingTest {
 
@@ -71,13 +71,6 @@ class CharactersViewModelTest {
         val result = charactersViewModel.charactersPagingData("")
 
         assertNotNull(result.first())
-
-//        mainCoroutineRule.launch {
-//
-////            assertEquals(1, result.count())
-//        }
-
-//        verify(getCharactersUseCase).invoke(any())
     }
 
 

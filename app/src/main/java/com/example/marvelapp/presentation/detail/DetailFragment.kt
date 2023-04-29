@@ -45,19 +45,24 @@ class DetailFragment : Fragment() {
 
         binding.imageCharacter.run {
             transitionName = detailViewArg.name
-            imageLoader.loadImage(this, detailViewArg.imageUrl, R.drawable.ic_img_loading_error)
+            imageLoader.loadImage(this, detailViewArg.imageUrl)
         }
 
         setSharedElementTransitionOnEnter()
 
 
         viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
-            val logResult = when (uiState) {
-                DetailViewModel.UiState.Loading -> "Loading comics..."
-                is DetailViewModel.UiState.Success -> uiState.comics.toString()
-                is DetailViewModel.UiState.Error -> "Error"
+            when (uiState) {
+                DetailViewModel.UiState.Loading -> {
+                }
+                is DetailViewModel.UiState.Success -> binding.recyclerParentDetail.run {
+                    setHasFixedSize(true)
+                    adapter = DetailParentAdapter(uiState.detailParentList, imageLoader)
+                }
+
+                is DetailViewModel.UiState.Error -> {
+                }
             }
-            Log.d(DetailFragment::class.simpleName, "onViewCreated: $logResult")
         }
 
         viewModel.getComics(detailViewArg.characterId)

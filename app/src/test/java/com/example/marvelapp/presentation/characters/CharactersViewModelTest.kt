@@ -52,13 +52,13 @@ class CharactersViewModelTest {
 
     @After
     fun doAfter() {
-        mainCoroutineRule.cancel()
+        mainCoroutineRule.testDispatcher.cancel()
     }
 
 
 
     @Test
-    fun `should validate the paging data object values when calling charactersPagingData`() = runBlockingTest {
+    fun `should validate the paging data object values when calling charactersPagingData`() = runTest {
 
         whenever(
             getCharactersUseCase.invoke(any())
@@ -75,7 +75,7 @@ class CharactersViewModelTest {
 
 
     @Test(expected = java.lang.RuntimeException::class)
-    fun `should throwsan exception when the calling to the use case returns an exception`() = runBlockingTest {
+    fun `should throwsan exception when the calling to the use case returns an exception`() = runTest {
 
         whenever(
             getCharactersUseCase.invoke(any())

@@ -11,14 +11,19 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import com.example.marvelapp.databinding.FragmentCharactersBinding
+import com.example.marvelapp.framework.imageloader.ImageLoader
+import com.example.marvelapp.presentation.detail.DetailViewArg
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class CharactersFragment : Fragment() {
+class CharactersFragment: Fragment() {
 
     private var _binding: FragmentCharactersBinding? = null
     private val binding get() = _binding!!
@@ -26,6 +31,9 @@ class CharactersFragment : Fragment() {
     private val viewModel: CharactersViewModel by viewModels()
 
     private lateinit var characterAdapter: CharacterAdapter
+
+    @Inject
+    lateinit var imageLoader: ImageLoader
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +62,17 @@ class CharactersFragment : Fragment() {
     }
 
     private fun initCharactersAdapter() {
-        characterAdapter = CharacterAdapter()
+        characterAdapter = CharacterAdapter(imageLoader) { character, view ->
+            val extras = FragmentNavigatorExtras(
+                view to character.name
+            )
+            val directions = CharactersFragmentDirections.actionCharactersFragmentToDetailFragment(
+                character.name,
+                DetailViewArg(character.id, character.name, character.imageUrl)
+            )
+
+            findNavController().navigate(directions, extras)
+        }
         binding.recyclerCharacters.run {
             scrollToPosition(0)
             setHasFixedSize(true)
@@ -82,7 +100,7 @@ class CharactersFragment : Fragment() {
                         is LoadState.Error -> {
                             setShimmerVisibility(false)
                             binding.includeViewCharactersErrorState.buttonRetry.setOnClickListener {
-                                characterAdapter.refresh()
+                                characterAdapter.retry()
                             }
                             FLIPPER_CHILD_ERROR
                         }

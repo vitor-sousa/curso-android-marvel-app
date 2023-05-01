@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.example.core.domain.model.Comic
 import com.example.core.domain.model.Event
+import com.example.core.usecase.AddFavoriteUseCase
 import com.example.core.usecase.GetCharacterCategoriesUseCase
 import com.example.core.usecase.base.ResultStatus
 import com.example.marvelapp.R
@@ -42,10 +43,13 @@ class DetailViewModelTest {
     private lateinit var detailViewModel: DetailViewModel
 
     @Mock
-    private lateinit var uiStateObserver: Observer<DetailViewModel.UiState>
+    private lateinit var uiStateObserver: Observer<UiActionStateLiveData.UiState>
 
     @Mock
     private lateinit var getCharacterCategoriesUseCase: GetCharacterCategoriesUseCase
+
+    @Mock
+    private lateinit var addFavoriteUseCase: AddFavoriteUseCase
 
     private val character = CharacterFactory().create(CharacterFactory.Hero.Spiderman)
     private val comics = listOf(ComicFactory.create(ComicFactory.FakeComic.FakeComic1))
@@ -55,8 +59,13 @@ class DetailViewModelTest {
 
     @Before
     fun setUp() {
-        detailViewModel = DetailViewModel(getCharacterCategoriesUseCase)
-        detailViewModel.uiState.observeForever(uiStateObserver)
+        detailViewModel = DetailViewModel(
+            getCharacterCategoriesUseCase,
+            addFavoriteUseCase,
+            mainCoroutineRule.testDispatcherProvider
+        ).apply {
+            categories.state.observeForever(uiStateObserver)
+        }
     }
 
     @After
@@ -77,11 +86,11 @@ class DetailViewModelTest {
             )
         )
 
-        detailViewModel.getCharacterCategories(character.id)
+        detailViewModel.categories.load(character.id)
 
-        verify(uiStateObserver).onChanged(isA<DetailViewModel.UiState.Success>())
+        verify(uiStateObserver).onChanged(isA<UiActionStateLiveData.UiState.Success>())
 
-        val uiStateSuccess = detailViewModel.uiState.value as DetailViewModel.UiState.Success
+        val uiStateSuccess = detailViewModel.categories.state.value as UiActionStateLiveData.UiState.Success
         val categoriesParentList = uiStateSuccess.detailParentList
 
         assertEquals(2, categoriesParentList.size)
@@ -99,10 +108,10 @@ class DetailViewModelTest {
             )
         )
 
-        detailViewModel.getCharacterCategories(character.id)
+        detailViewModel.categories.load(character.id)
 
-        val resultExpect = DetailViewModel.UiState.Empty
-        Assert.assertEquals(resultExpect, detailViewModel.uiState.value)
+        val resultExpect = UiActionStateLiveData.UiState.Empty
+        Assert.assertEquals(resultExpect, detailViewModel.categories.state.value)
     }
 
     @Test
@@ -117,11 +126,11 @@ class DetailViewModelTest {
             )
         )
 
-        detailViewModel.getCharacterCategories(character.id)
+        detailViewModel.categories.load(character.id)
 
-        verify(uiStateObserver).onChanged(isA<DetailViewModel.UiState.Success>())
+        verify(uiStateObserver).onChanged(isA<UiActionStateLiveData.UiState.Success>())
 
-        val uiStateSuccess = detailViewModel.uiState.value as DetailViewModel.UiState.Success
+        val uiStateSuccess = detailViewModel.categories.state.value as UiActionStateLiveData.UiState.Success
         val categoriesParentList = uiStateSuccess.detailParentList
 
         assertEquals(1, categoriesParentList.size)
@@ -140,11 +149,11 @@ class DetailViewModelTest {
             )
         )
 
-        detailViewModel.getCharacterCategories(character.id)
+        detailViewModel.categories.load(character.id)
 
-        verify(uiStateObserver).onChanged(isA<DetailViewModel.UiState.Success>())
+        verify(uiStateObserver).onChanged(isA<UiActionStateLiveData.UiState.Success>())
 
-        val uiStateSuccess = detailViewModel.uiState.value as DetailViewModel.UiState.Success
+        val uiStateSuccess = detailViewModel.categories.state.value as UiActionStateLiveData.UiState.Success
         val categoriesParentList = uiStateSuccess.detailParentList
 
         assertEquals(1, categoriesParentList.size)
@@ -161,10 +170,10 @@ class DetailViewModelTest {
             )
         )
 
-        detailViewModel.getCharacterCategories(character.id)
+        detailViewModel.categories.load(character.id)
 
-        val resultExpect = DetailViewModel.UiState.Error
-        Assert.assertEquals(resultExpect, detailViewModel.uiState.value)
+        val resultExpect = UiActionStateLiveData.UiState.Error
+        Assert.assertEquals(resultExpect, detailViewModel.categories.state.value)
     }
 
 }

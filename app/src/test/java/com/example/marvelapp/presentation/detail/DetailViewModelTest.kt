@@ -281,13 +281,8 @@ class DetailViewModelTest {
                 )
             )
 
-            whenever(
-                checkFavoriteUseCase.invoke(any())
-            ).thenReturn(
-                flowOf(ResultStatus.Success(true))
-            )
 
-            detailViewModel.favorite.checkFavorite(character.id)
+            detailViewModel.favorite.currentFavoriteIcon = R.drawable.ic_favorite_checked
 
             detailViewModel.favorite.update(detailViewArg)
 

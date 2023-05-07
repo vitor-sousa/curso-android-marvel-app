@@ -90,20 +90,25 @@ class DetailFragment : Fragment() {
 
     private fun setAndObserverFavoriteUiState(detailViewArg: DetailViewArg) {
 
-        binding.imageFavoriteIcon.setOnClickListener {
-            viewModel.favorite.update(detailViewArg)
-        }
+        viewModel.favorite.run {
 
-        viewModel.favorite.state.observe(viewLifecycleOwner) { favoriteUiState ->
-            binding.flipperFavorite.displayedChild = when(favoriteUiState) {
-                is FavoriteUiActionStateLiveData.UiState.Loading -> FLIPPER_FAVORITE_LOADING
-                is FavoriteUiActionStateLiveData.UiState.Icon -> {
-                    binding.imageFavoriteIcon.setImageResource(favoriteUiState.icon)
-                    FLIPPER_FAVORITE_ICON
-                }
-                is FavoriteUiActionStateLiveData.UiState.Error -> {
-                    showShortToast(favoriteUiState.messageResId)
-                    FLIPPER_FAVORITE_ICON
+            checkFavorite(detailViewArg.characterId)
+
+            binding.imageFavoriteIcon.setOnClickListener {
+                update(detailViewArg)
+            }
+
+            state.observe(viewLifecycleOwner) { favoriteUiState ->
+                binding.flipperFavorite.displayedChild = when(favoriteUiState) {
+                    is FavoriteUiActionStateLiveData.UiState.Loading -> FLIPPER_FAVORITE_LOADING
+                    is FavoriteUiActionStateLiveData.UiState.Icon -> {
+                        binding.imageFavoriteIcon.setImageResource(favoriteUiState.icon)
+                        FLIPPER_FAVORITE_ICON
+                    }
+                    is FavoriteUiActionStateLiveData.UiState.Error -> {
+                        showShortToast(favoriteUiState.messageResId)
+                        FLIPPER_FAVORITE_ICON
+                    }
                 }
             }
         }

@@ -3,11 +3,13 @@ package com.example.marvelapp.presentation.detail
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataScope
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import com.example.core.usecase.AddFavoriteUseCase
 import com.example.core.usecase.CheckFavoriteUseCase
+import com.example.core.usecase.DeleteFavoriteUseCase
 import com.example.marvelapp.R
 import com.example.marvelapp.presentation.extensions.watchStatus
 import kotlin.coroutines.CoroutineContext
@@ -15,33 +17,55 @@ import kotlin.coroutines.CoroutineContext
 class FavoriteUiActionStateLiveData(
     coroutineContext: CoroutineContext,
     checkFavoriteUseCase: CheckFavoriteUseCase,
-    addFavoriteUseCase: AddFavoriteUseCase
+    addFavoriteUseCase: AddFavoriteUseCase,
+    deleteFavoriteUseCase: DeleteFavoriteUseCase
 ) {
+
+    private var currentFavoriteIcon = R.drawable.ic_favorite_unchecked
 
     private val action = MutableLiveData<Action>()
     val state: LiveData<UiState> = action.switchMap {
         liveData(coroutineContext) {
-            when(it) {
+            when (it) {
                 is Action.CheckFavorite -> {
-                    checkFavoriteUseCase.invoke(CheckFavoriteUseCase.Params(it.characterId)).watchStatus(
-                        loading = { emit(UiState.Loading) },
-                        success = { isFavorite ->
-                            var icon = R.drawable.ic_favorite_unchecked
-                            if (isFavorite)
-                                icon = R.drawable.ic_favorite_checked
-                            emit(UiState.Icon(icon))
-                        },
-                        error = { emit(UiState.Error(R.string.error_add_favorite)) }
-                    )
+                    checkFavoriteUseCase.invoke(CheckFavoriteUseCase.Params(it.characterId))
+                        .watchStatus(
+                            loading = { emit(UiState.Loading) },
+                            success = { isFavorite ->
+                                if (isFavorite)
+                                    currentFavoriteIcon = R.drawable.ic_favorite_checked
+                                emitFavoriteIcon()
+                            },
+                            error = {}
+                        )
                 }
-                is Action.Update -> {
+
+                is Action.AddFavorite -> {
                     it.detailViewArg.run {
                         addFavoriteUseCase.invoke(
                             AddFavoriteUseCase.Params(characterId, name, imageUrl)
                         ).watchStatus(
                             loading = { emit(UiState.Loading) },
-                            success = { emit(UiState.Icon(R.drawable.ic_favorite_checked)) },
+                            success = {
+                                currentFavoriteIcon = R.drawable.ic_favorite_checked
+                                emitFavoriteIcon()
+                            },
                             error = { emit(UiState.Error(R.string.error_add_favorite)) }
+                        )
+                    }
+                }
+
+                is Action.RemoveFavorite -> {
+                    it.detailViewArg.run {
+                        deleteFavoriteUseCase.invoke(
+                            DeleteFavoriteUseCase.Params(characterId, name, imageUrl)
+                        ).watchStatus(
+                            loading = { emit(UiState.Loading) },
+                            success = {
+                                currentFavoriteIcon = R.drawable.ic_favorite_unchecked
+                                emitFavoriteIcon()
+                            },
+                            error = { emit(UiState.Error(R.string.error_remove_favorite)) }
                         )
                     }
                 }
@@ -49,23 +73,31 @@ class FavoriteUiActionStateLiveData(
         }
     }
 
+    private suspend fun LiveDataScope<UiState>.emitFavoriteIcon() {
+        emit(UiState.Icon(currentFavoriteIcon))
+    }
+
     fun checkFavorite(characterId: Int) {
         action.value = Action.CheckFavorite(characterId)
     }
 
     fun update(detailViewArg: DetailViewArg) {
-        action.value = Action.Update(detailViewArg)
+        action.value = if (currentFavoriteIcon == R.drawable.ic_favorite_unchecked)
+            Action.AddFavorite(detailViewArg)
+        else
+            Action.RemoveFavorite(detailViewArg)
     }
 
 
     sealed class UiState {
-        object Loading: UiState()
-        data class Icon(@DrawableRes val icon: Int): UiState()
-        data class Error(@StringRes val messageResId: Int): UiState()
+        object Loading : UiState()
+        data class Icon(@DrawableRes val icon: Int) : UiState()
+        data class Error(@StringRes val messageResId: Int) : UiState()
     }
 
     sealed class Action {
-        data class CheckFavorite(val characterId: Int): Action()
-        data class Update(val detailViewArg: DetailViewArg): Action()
+        data class CheckFavorite(val characterId: Int) : Action()
+        data class AddFavorite(val detailViewArg: DetailViewArg) : Action()
+        data class RemoveFavorite(val detailViewArg: DetailViewArg) : Action()
     }
 }

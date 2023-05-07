@@ -47,7 +47,8 @@ class CharactersViewModelTest {
 
     @Before
     fun setUp() {
-        charactersViewModel = CharactersViewModel(getCharactersUseCase)
+        charactersViewModel =
+            CharactersViewModel(getCharactersUseCase, mainCoroutineRule.testDispatcherProvider)
     }
 
     @After
@@ -56,34 +57,35 @@ class CharactersViewModelTest {
     }
 
 
-
     @Test
-    fun `should validate the paging data object values when calling charactersPagingData`() = runTest {
+    fun `should validate the paging data object values when calling charactersPagingData`() =
+        runTest {
 
-        whenever(
-            getCharactersUseCase.invoke(any())
-        ).thenReturn(
-            flowOf(
-                pagingDataCharacters
+            whenever(
+                getCharactersUseCase.invoke(any())
+            ).thenReturn(
+                flowOf(
+                    pagingDataCharacters
+                )
             )
-        )
 
-        val result = charactersViewModel.charactersPagingData("")
+            val result = charactersViewModel.charactersPagingData("")
 
-        assertNotNull(result.first())
-    }
+            assertNotNull(result.first())
+        }
 
 
     @Test(expected = java.lang.RuntimeException::class)
-    fun `should throwsan exception when the calling to the use case returns an exception`() = runTest {
+    fun `should throwsan exception when the calling to the use case returns an exception`() =
+        runTest {
 
-        whenever(
-            getCharactersUseCase.invoke(any())
-        ).thenThrow(
-            java.lang.RuntimeException()
-        )
+            whenever(
+                getCharactersUseCase.invoke(any())
+            ).thenThrow(
+                java.lang.RuntimeException()
+            )
 
-        charactersViewModel.charactersPagingData("")
-    }
+            charactersViewModel.charactersPagingData("")
+        }
 
 }

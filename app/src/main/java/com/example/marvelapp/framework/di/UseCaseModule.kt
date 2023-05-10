@@ -1,9 +1,17 @@
 package com.example.marvelapp.framework.di
 
+import com.example.core.usecase.AddFavoriteUseCase
+import com.example.core.usecase.AddFavoriteUseCaseImpl
+import com.example.core.usecase.CheckFavoriteUseCase
+import com.example.core.usecase.CheckFavoriteUseCaseImpl
+import com.example.core.usecase.DeleteFavoriteUseCase
+import com.example.core.usecase.DeleteFavoriteUseCaseImpl
 import com.example.core.usecase.GetCharactersUseCase
 import com.example.core.usecase.GetCharactersUseCaseImpl
 import com.example.core.usecase.GetCharacterCategoriesUseCase
 import com.example.core.usecase.GetCharacterCategoriesUseCaseImpl
+import com.example.core.usecase.GetFavoritesUseCase
+import com.example.core.usecase.GetFavoritesUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,10 +22,33 @@ import dagger.hilt.android.components.ViewModelComponent
 interface UseCaseModule {
 
     @Binds
-    fun bindGetCharactersUseCase(useCase: GetCharactersUseCaseImpl) : GetCharactersUseCase
+    fun bindGetCharactersUseCase(
+        useCase: GetCharactersUseCaseImpl
+    ) : GetCharactersUseCase
 
     @Binds
-    fun bindGetCharacterCategoriesUseCase(useCase: GetCharacterCategoriesUseCaseImpl) : GetCharacterCategoriesUseCase
+    fun bindGetCharacterCategoriesUseCase(
+        useCase: GetCharacterCategoriesUseCaseImpl
+    ) : GetCharacterCategoriesUseCase
 
+    @Binds
+    fun bindAddFavoriteUseCase(
+        useCase: AddFavoriteUseCaseImpl
+    ): AddFavoriteUseCase
+
+    @Binds
+    fun bindCheckFavoriteUseCase(
+        useCase: CheckFavoriteUseCaseImpl
+    ): CheckFavoriteUseCase
+
+    @Binds
+    fun bindDeleteFavoriteUseCase(
+        useCase: DeleteFavoriteUseCaseImpl
+    ): DeleteFavoriteUseCase
+
+    @Binds
+    fun bindsGetFavoritesUseCase(
+        useCase: GetFavoritesUseCaseImpl
+    ): GetFavoritesUseCase
 }
 

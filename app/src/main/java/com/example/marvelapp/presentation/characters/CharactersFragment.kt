@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -30,10 +29,22 @@ class CharactersFragment: Fragment() {
 
     private val viewModel: CharactersViewModel by viewModels()
 
-    private lateinit var characterAdapter: CharacterAdapter
-
     @Inject
     lateinit var imageLoader: ImageLoader
+
+    private val characterAdapter: CharacterAdapter by lazy {
+        CharacterAdapter(imageLoader) { character, view ->
+            val extras = FragmentNavigatorExtras(
+                view to character.name
+            )
+            val directions = CharactersFragmentDirections.actionCharactersFragmentToDetailFragment(
+                character.name,
+                DetailViewArg(character.id, character.name, character.imageUrl)
+            )
+
+            findNavController().navigate(directions, extras)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,35 +63,29 @@ class CharactersFragment: Fragment() {
         initCharactersAdapter()
         observeInitialLoadState()
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.charactersPagingData("").collect {
-                    characterAdapter.submitData(it)
+        viewModel.state.observe(viewLifecycleOwner) { uiState ->
+            when (uiState) {
+                is CharactersViewModel.UiState.SearchResult -> {
+                    characterAdapter.submitData(viewLifecycleOwner.lifecycle, uiState.data)
                 }
             }
         }
+        viewModel.searchCharacter()
     }
 
     private fun initCharactersAdapter() {
-        characterAdapter = CharacterAdapter(imageLoader) { character, view ->
-            val extras = FragmentNavigatorExtras(
-                view to character.name
-            )
-            val directions = CharactersFragmentDirections.actionCharactersFragmentToDetailFragment(
-                character.name,
-                DetailViewArg(character.id, character.name, character.imageUrl)
-            )
-
-            findNavController().navigate(directions, extras)
-        }
+        postponeEnterTransition()
         binding.recyclerCharacters.run {
-            scrollToPosition(0)
             setHasFixedSize(true)
             adapter = characterAdapter.withLoadStateFooter(
                 footer = CharactersLoadStateAdapter(
                     characterAdapter::retry
                 )
             )
+            viewTreeObserver.addOnDrawListener {
+                startPostponedEnterTransition()
+                true
+            }
         }
     }
 

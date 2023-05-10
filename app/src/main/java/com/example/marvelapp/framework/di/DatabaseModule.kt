@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.example.core.data.DbConstants.APP_DATABASE_NAME
 import com.example.marvelapp.framework.db.AppDatabase
+import com.example.marvelapp.framework.db.dao.CharacterDao
 import com.example.marvelapp.framework.db.dao.FavoriteDao
+import com.example.marvelapp.framework.db.dao.RemoteKeyDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,5 +31,15 @@ object DatabaseModule {
     fun provideFavoriteDao(
         appDatabase: AppDatabase
     ): FavoriteDao = appDatabase.favoriteDao()
+
+    @Provides
+    fun provideCharacterDao(
+        appDatabase: AppDatabase
+    ): CharacterDao = appDatabase.characterDao()
+
+    @Provides
+    fun provideRemoteKeDao(
+        appDatabase: AppDatabase
+    ): RemoteKeyDao = appDatabase.remoteKeyDao()
 
 }

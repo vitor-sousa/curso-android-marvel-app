@@ -85,6 +85,10 @@ android {
     viewBinding {
         enabled = true
     }
+
+    lint {
+        lintConfig = file("$rootDir/lint-baseline.xml")
+    }
 }
 
 dependencies {

@@ -9,8 +9,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionInflater
+import com.example.marvelapp.R
 import com.example.marvelapp.databinding.FragmentDetailBinding
 import com.example.marvelapp.framework.imageloader.ImageLoader
+import com.example.marvelapp.presentation.extensions.showShortToast
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -49,13 +51,22 @@ class DetailFragment : Fragment() {
 
         setSharedElementTransitionOnEnter()
 
-        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+        loadCategoriesAndObserveUiState(detailViewArg)
+        setAndObserverFavoriteUiState(detailViewArg)
+
+    }
+
+    private fun loadCategoriesAndObserveUiState(detailViewArg: DetailViewArg) {
+
+        viewModel.categories.load(detailViewArg.characterId)
+
+        viewModel.categories.state.observe(viewLifecycleOwner) { uiState ->
             binding.flipperDetail.displayedChild = when (uiState) {
-                DetailViewModel.UiState.Loading -> {
+                UiActionStateLiveData.UiState.Loading -> {
                     setShimmerVisibility(true)
                     FLIPPER_CHILD_LOADING
                 }
-                is DetailViewModel.UiState.Success -> {
+                is UiActionStateLiveData.UiState.Success -> {
                     binding.recyclerParentDetail.run {
                         setHasFixedSize(true)
                         adapter = DetailParentAdapter(uiState.detailParentList, imageLoader)
@@ -63,21 +74,45 @@ class DetailFragment : Fragment() {
                     setShimmerVisibility(false)
                     FLIPPER_CHILD_DETAIL
                 }
-                is DetailViewModel.UiState.Error -> {
+                is UiActionStateLiveData.UiState.Error -> {
                     binding.includeViewCharactersErrorState.buttonRetry.setOnClickListener {
-                        viewModel.getCharacterCategories(detailViewArg.characterId)
+                        viewModel.categories.load(detailViewArg.characterId)
                     }
                     setShimmerVisibility(false)
                     FLIPPER_CHILD_ERROR
                 }
-                is DetailViewModel.UiState.Empty -> {
+                is UiActionStateLiveData.UiState.Empty -> {
                     setShimmerVisibility(false)
                     FLIPPER_CHILD_EMPTY
                 }
             }
         }
+    }
 
-        viewModel.getCharacterCategories(detailViewArg.characterId)
+    private fun setAndObserverFavoriteUiState(detailViewArg: DetailViewArg) {
+
+        viewModel.favorite.run {
+
+            checkFavorite(detailViewArg.characterId)
+
+            binding.imageFavoriteIcon.setOnClickListener {
+                update(detailViewArg)
+            }
+
+            state.observe(viewLifecycleOwner) { favoriteUiState ->
+                binding.flipperFavorite.displayedChild = when(favoriteUiState) {
+                    is FavoriteUiActionStateLiveData.UiState.Loading -> FLIPPER_FAVORITE_LOADING
+                    is FavoriteUiActionStateLiveData.UiState.Icon -> {
+                        binding.imageFavoriteIcon.setImageResource(favoriteUiState.icon)
+                        FLIPPER_FAVORITE_ICON
+                    }
+                    is FavoriteUiActionStateLiveData.UiState.Error -> {
+                        showShortToast(favoriteUiState.messageResId)
+                        FLIPPER_FAVORITE_ICON
+                    }
+                }
+            }
+        }
     }
 
 
@@ -108,6 +143,9 @@ class DetailFragment : Fragment() {
         private const val FLIPPER_CHILD_DETAIL = 1
         private const val FLIPPER_CHILD_ERROR = 2
         private const val FLIPPER_CHILD_EMPTY = 3
+
+        private const val FLIPPER_FAVORITE_ICON = 0
+        private const val FLIPPER_FAVORITE_LOADING = 1
     }
 
 }

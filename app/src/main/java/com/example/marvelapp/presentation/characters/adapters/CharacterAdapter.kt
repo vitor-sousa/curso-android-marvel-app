@@ -1,4 +1,4 @@
-package com.example.marvelapp.presentation.characters
+package com.example.marvelapp.presentation.characters.adapters
 
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.DiffUtil
 import com.example.core.domain.model.Character
 import com.example.marvelapp.framework.imageloader.ImageLoader
 import com.example.marvelapp.util.OnCharacterItemClick
-import javax.inject.Inject
 
 class CharacterAdapter (
     private val imageLoader: ImageLoader,

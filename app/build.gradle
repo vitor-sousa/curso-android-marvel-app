@@ -170,7 +170,9 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestUtil 'androidx.test:orchestrator:1.4.1'
 
-
+    // Instrumentation tests
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
+    androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
+
 
 }
